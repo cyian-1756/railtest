@@ -1,4 +1,4 @@
---revision 2 
+--revision 2
 --worry about speed, worry about direction
 --if it hits a t then swap the z with x direction
 --if it hits a point where there is no rail in direction, check for t, then check for turn,
@@ -6,7 +6,7 @@
 --eventually make it so you can push them
 --eventually make it so you can connect them
 --make this mod totally physical, no clicking to move, etc, push it, or use control panel
---then do furnace carts to push as a starter, try to make this super in depth, 
+--then do furnace carts to push as a starter, try to make this super in depth,
 --rewrite this to use voxel manip, and open up a 3x3 box to do logic
 
 --let's start off
@@ -14,7 +14,7 @@
 the goal is
 
 make a stick spawn a basic prototype of a minecart which uses moveto interpolated to give the illusion of movement
-without creating extreme scenarios which can cause minecarts to go flying clientside, 
+without creating extreme scenarios which can cause minecarts to go flying clientside,
 just stopping via clientside until catchup, which is much neater and more digestable mentally
 ]]--
 
@@ -34,7 +34,7 @@ local minecart   = {
 	visual_size = {x=1, y=1},
 	textures = {"cart.png"},
 	automatic_face_movement_dir = 0.0,
-	
+
 	direction    = {x=0,y=0,z=0},
 	speed        = 0, --dpt (distance per tick, speed measurement)
 }
@@ -60,7 +60,7 @@ function minecart.on_rightclick(self, clicker)
 		if self.speed ~= 0 then
 			self.speed = 0
 		else
-			self.speed     = 0.2
+			self.speed = 0.2
 			clicker:set_attach(self.object, "", {x=0,y=0,z=0}, {x=0,y=0,z=0})
 		end
 	end
@@ -88,8 +88,8 @@ function roll(self)
 	local direction = self.object:get_luaentity().direction
 	local speed     = self.object:get_luaentity().speed
 	local leader    = self.object:get_luaentity().leader
-	
-	
+
+
 	local x = math.floor(pos.x + 0.5)
 	local y = math.floor(pos.y + 0.5) --the center of the node
 	local z = math.floor(pos.z + 0.5)
@@ -105,7 +105,7 @@ function roll(self)
 	local nodeahead   = minetest.get_node({x=pos.x+(direction.x/2),y=pos.y+(direction.y/2),z=pos.z+(direction.z/2)}).name --1 rounded node ahead
 	----
 	local movement  = {x=pos.x,y=pos.y,z=pos.z}
-	
+
 	--reverse direction if collides with players
 	--[[
 	for _,object in ipairs(minetest.env:get_objects_inside_radius(pos, 1)) do
@@ -138,7 +138,7 @@ function roll(self)
 	end
 	]]--
 	--this is the prototype for carts to follow eachother
-	
+
 	for _,object in ipairs(minetest.env:get_objects_inside_radius(pos, 8)) do
 		if object:is_player() == false then
 			if leader ~= nil then
@@ -237,10 +237,10 @@ function roll(self)
 		end
 	--turn and handle T junctions
 	elseif nodeahead ~= "default:rail" and upnode ~= "default:rail" and downnode ~= "default:rail" then
-		if math.abs(direction.x) > 0 then	
+		if math.abs(direction.x) > 0 then
 			local left  = minetest.get_node({x=pos.x,y=pos.y,z=pos.z + 1}).name
 			local right = minetest.get_node({x=pos.x,y=pos.y,z=pos.z - 1}).name
-		
+
 			if left == "default:rail" then
 				direction.x = 0
 				direction.z = 1
@@ -248,7 +248,7 @@ function roll(self)
 				direction.x = 0
 				direction.z = -1
 			end
-		elseif math.abs(direction.z) > 0 then	
+		elseif math.abs(direction.z) > 0 then
 			local left  = minetest.get_node({x=pos.x + 1,y=pos.y,z=pos.z}).name
 			local right = minetest.get_node({x=pos.x - 1,y=pos.y,z=pos.z}).name
 			if left == "default:rail" then
@@ -260,11 +260,11 @@ function roll(self)
 			end
 		end
 	end
-	
+
 	self.object:moveto(movement)
 	self.object:get_luaentity().direction = direction
 	self.object:get_luaentity().speed = speed
-	
+
 end
 
 
@@ -297,7 +297,7 @@ end
 minetest.override_item("default:stick", {
 	on_place = function(itemstack, placer, pointed_thing)
 		local nodename = minetest.get_node(pointed_thing.under).name
-		
+
 		if nodename == "default:rail" then
 			minetest.add_entity(pointed_thing.under, "trains:minecart")
 		end
