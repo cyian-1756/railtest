@@ -274,9 +274,9 @@ function roll(self)
             -- The cart can only go 0.48 before it can no longer follow the tracks
             -- which is why 0.49 is the hardcoded max speed
             -- TODO make this a config option
-            if speed + 0.01 < 0.49 and self.traveling_forwards == true then
+            if speed + 0.01 < 0.49 and self.traveling_forwards == true  and self.fuel > 0 then
                 speed = speed + 0.01
-            elseif self.traveling_forwards == false then
+            elseif self.traveling_forwards == false and self.fuel > 0 then
                 -- Check speed to see if we should stop competely or not
                 if 0 >= speed - 0.01 then
                     speed = 0
@@ -300,9 +300,9 @@ function roll(self)
                     self.traveling_forwards = false
                 end
             end
-            if speed + 0.01 < 0.49 and self.traveling_forwards == false then
+            if speed + 0.01 < 0.49 and self.traveling_forwards == false and self.fuel > 0 then
                 speed = speed + 0.01
-            elseif self.traveling_forwards == true then
+            elseif self.traveling_forwards == true and self.fuel > 0 then
                 -- Check speed to see if we should stop competely or not
                 if 0 >= speed - 0.01 then
                     speed = 0
