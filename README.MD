@@ -24,3 +24,6 @@ Backwards (Default s) to move the cart backwards
 Punch the cart to destroy it
 
 Sneak (Default left shift) and right click the cart while holding default:coal_lump to fuel the cart
+
+
+Based on [trains](https://github.com/jordan4ibanez/trains)
