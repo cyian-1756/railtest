@@ -24,6 +24,9 @@ just stopping via clientside until catchup, which is much neater and more digest
 --direction == pos - lastpos vector
 --randomize turning for single carts?
 --stop moveto if no rail at pos,and cancel whole collision detection if not on rail
+
+dofile(minetest.get_modpath("railtest").."/funcs.lua")
+
 cart_link = {}
 
 local minecart   = {
@@ -178,14 +181,14 @@ function roll(self)
 	end
 
     --local currentnode = minetest.get_node({x=x,y=y,z=z}).name
-    local forwardnode = minetest.get_node({x=speedx,y=y,z=speedz}).name --the node 1 space in front of it
+    local forwardnode = minetest.get_node({x=speedx,y=y,z=speedz}) --the node 1 space in front of it
     -- minetest.chat_send_player("singleplayer", forwardnode)
-    local upnode      = minetest.get_node({x=speedx+(direction.x),y=speedy+1,z=speedz+(direction.z)}).name    --the node 1 space up + 1 space forwards
-    local downnode    = minetest.get_node({x=pos.x+(direction.x/2),y=speedy-1,z=pos.z+(direction.z/2)}).name    --the node 1 space down + 1 space forwards
-    local nodeahead   = minetest.get_node({x=pos.x+(direction.x/2),y=pos.y+(direction.y/2),z=pos.z+(direction.z/2)}).name --1 rounded node ahead
+    local upnode      = minetest.get_node({x=speedx+(direction.x),y=speedy+1,z=speedz+(direction.z)})    --the node 1 space up + 1 space forwards
+    local downnode    = minetest.get_node({x=pos.x+(direction.x/2),y=speedy-1,z=pos.z+(direction.z/2)})    --the node 1 space down + 1 space forwards
+    local nodeahead   = minetest.get_node({x=pos.x+(direction.x/2),y=pos.y+(direction.y/2),z=pos.z+(direction.z/2)}) --1 rounded node ahead
 
 	--move minecart down
-	if forwardnode ~= "default:rail" and downnode == "default:rail" and direction.y == 0 then
+	if is_rail(forwardnode) == false and is_rail(downnode) == true and direction.y == 0 then
 		direction.y = -1
 	elseif direction.y == -1 then
 		movement = {x=speedx,y=speedy,z=speedz}
@@ -197,11 +200,11 @@ function roll(self)
 		end
 		--when it gets to the bottom of the rail, stop moving down
 		local noder = minetest.get_node({x=speedx,y=pos.y-0.5-(speed*2),z=speedz}).name
-		if noder  ~= "default:rail" then
+		if is_rail(noder) == false then
 			direction.y = 0
 		end
 	--move minecart up
-	elseif nodeahead == "default:rail" and upnode == "default:rail" and direction.y == 0 then
+elseif is_rail(nodeahead) == true and is_rail(upnode) == true and direction.y == 0 then
 		direction.y = 1
 	elseif direction.y == 1 then
 		movement = {x=speedx,y=speedy,z=speedz}
@@ -212,11 +215,11 @@ function roll(self)
 			movement.x = x
 		end
 		--when it gets to the top of the rail, stop moving up
-		if minetest.get_node({x=speedx+(direction.x),y=speedy+0.5,z=speedz+(direction.z)}).name ~= "default:rail" then
+        if is_rail(minetest.get_node({x=speedx+(direction.x),y=speedy+0.5,z=speedz+(direction.z)})) == false then
 			direction.y = 0
 		end
 	--move the cart forwards
-	elseif nodeahead == "default:rail" and upnode ~= "default:rail" and direction.y == 0 or (nodeahead ~= "default:rail" and downnode == "default:rail") then --and upnode ~= "default:rail" and downnode ~= "default:rail" and direction.y == 0 then
+elseif is_rail(nodeahead) == true and is_rail(upnode) == false and direction.y == 0 or (is_rail(nodeahead) == false and is_rail(downnode) == true) then --and upnode ~= "default:rail" and is_rail(downnode) == false and direction.y == 0 then
 		if math.abs(speedx) ~= 0 or math.abs(speedz) ~= 0 then
 			movement = {x=speedx,y=speedy,z=speedz}
 			--keep cart on center of rail
@@ -227,7 +230,7 @@ function roll(self)
 			end
 		end
 	--turn and handle T junctions
-	elseif nodeahead ~= "default:rail" and upnode ~= "default:rail" and downnode ~= "default:rail" then
+	elseif is_rail(nodeahead) == false and is_rail(upnode) == fals and is_rail(downnode) == false then
 		if math.abs(direction.x) > 0 then
 			local left  = minetest.get_node({x=pos.x,y=pos.y,z=pos.z + 1}).name
 			local right = minetest.get_node({x=pos.x,y=pos.y,z=pos.z - 1}).name
@@ -347,7 +350,7 @@ function set_direction(self)
 	local backward  = minetest.get_node({x=pos.x - 1,y=pos.y,z=pos.z}).name
     self.traveling_forwards = true
 	local direction = {x=0,y=0,z=0}
-	if left == "default:rail" then
+	if is_rail(left) then
 		direction.z = 1
 	elseif right == "default:rail" then
 		direction.z = -1
@@ -358,6 +361,25 @@ function set_direction(self)
 	end
 	self.object:get_luaentity().direction = direction
 end
+
+minetest.register_craftitem("railtest:cart", {
+	description = "Cart",
+	inventory_image = minetest.inventorycube("default_cart_top.png", "default_cart_side.png", "default_cart_side.png"),
+	wield_image = "default_cart_side.png",
+
+	on_place = function(itemstack, placer, pointed_thing)
+		if not pointed_thing.type == "node" then
+			return
+		end
+		if cart_func:is_rail(pointed_thing.under) then
+			minetest.env:add_entity(pointed_thing.under, "railtest:minecart")
+			if not minetest.setting_getbool("creative_mode") then
+				itemstack:take_item()
+			end
+			return itemstack
+		end
+	end,
+})
 
 
 minetest.register_tool("railtest:crowbar", {
