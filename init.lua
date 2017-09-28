@@ -37,6 +37,8 @@ local minecart   = {
 
 	direction    = {x=0,y=0,z=0},
 	speed        = 0, --dpt (distance per tick, speed measurement)
+    -- The max amount of fuel this minecart can hold
+    max_fuel = 2000,
 }
 --punch function
 function minecart.on_punch(self)
@@ -45,22 +47,36 @@ end
 
 --right click function
 function minecart.on_rightclick(self, clicker)
-	--set_direction(self)
-	--sneak to link minecarts
+	--sneak to link/fuel minecarts
 	if clicker:get_player_control().sneak == true then
+        if clicker:get_wielded_item():get_name() == "default:coal_lump" then
+            if self.fuel + 100 <= minecart.max_fuel then
+                self.fuel = self.fuel + 100
+                minetest.chat_send_player(clicker:get_player_name(), "[railtest] Train has " ..self.fuel.. " fuel")
+                -- This work around is here because for some reason :take_item() doesn't work here
+                local stack_total = clicker:get_wielded_item():get_count()
+                clicker:set_wielded_item({name="default:coal_lump", count=stack_total - 1, wear=0, metadata=""})
+                return
+            else
+                minetest.chat_send_player(clicker:get_player_name(), "[railtest] Train is already at full fuel")
+                return
+            end
+        end
 		if cart_link[clicker:get_player_name()] == nil then
 			cart_link[clicker:get_player_name()] = self.object:get_luaentity()
 		else
 			self.leader = cart_link[clicker:get_player_name()]
 			cart_link[clicker:get_player_name()] = nil
 			self.speed     = 0.2
-			minetest.chat_send_player(clicker:get_player_name(), "Carts linked!")
+			minetest.chat_send_player(clicker:get_player_name(), "[railtest] Carts linked!")
 		end
 	else
-		if self.speed ~= 0 then
-			self.speed = 0
+		if self.player then
+			self.player:set_detach()
+            self.player = nil
 		else
-			self.speed = 0.2
+			self.speed = 0.0
+            self.player = clicker
 			clicker:set_attach(self.object, "", {x=0,y=0,z=0}, {x=0,y=0,z=0})
 		end
 	end
@@ -76,18 +92,23 @@ function minecart.on_step(self, dtime)
 	roll(self)
 end
 
-minetest.register_entity("trains:minecart", minecart)
+minetest.register_entity("railtest:minecart", minecart)
 
 
 
 --how the minecart moves on the tracks
 -- "cart logic"
 function roll(self)
+    -- Make sure fuel is never nil
+    if self.fuel == nil then
+        self.fuel = 0
+    end
 
 	local pos       = self.object:getpos()
 	local direction = self.object:get_luaentity().direction
 	local speed     = self.object:get_luaentity().speed
 	local leader    = self.object:get_luaentity().leader
+    local fuel      = self.fuel
 
 
 	local x = math.floor(pos.x + 0.5)
@@ -98,47 +119,9 @@ function roll(self)
 	local speedy = pos.y + (direction.y * speed) --the speed moveto uses to move the minecart
 	local speedz = pos.z + (direction.z * speed)
 	-----
-	--local currentnode = minetest.get_node({x=x,y=y,z=z}).name
-	local forwardnode = minetest.get_node({x=speedx,y=y,z=speedz}).name --the node 1 space in front of it
-	local upnode      = minetest.get_node({x=speedx+(direction.x),y=speedy+1,z=speedz+(direction.z)}).name    --the node 1 space up + 1 space forwards
-	local downnode    = minetest.get_node({x=pos.x+(direction.x/2),y=speedy-1,z=pos.z+(direction.z/2)}).name    --the node 1 space down + 1 space forwards
-	local nodeahead   = minetest.get_node({x=pos.x+(direction.x/2),y=pos.y+(direction.y/2),z=pos.z+(direction.z/2)}).name --1 rounded node ahead
-	----
 	local movement  = {x=pos.x,y=pos.y,z=pos.z}
 
-	--reverse direction if collides with players
-	--[[
-	for _,object in ipairs(minetest.env:get_objects_inside_radius(pos, 1)) do
-		if object:is_player() then
-			local pos2 = object:getpos()
-			local difx = pos.x - pos2.x
-			local difz = pos.z - pos2.z
-			if direction.x > 0 then
-				--calculate distance into speed
-				if difx < 0 then
-					direction.x = -1
-				end
-			elseif direction.x < 0 then
-				--calculate distance into speed
-				if difx > 0 then
-					direction.x = 1
-				end
-			elseif direction.z > 0 then
-				--calculate distance into speed
-				if difz < 0 then
-					direction.z = -1
-				end
-			elseif direction.z < 0 then
-				--calculate distance into speed
-				if difz > 0 then
-					direction.z = 1
-				end
-			end
-		end
-	end
-	]]--
 	--this is the prototype for carts to follow eachother
-
 	for _,object in ipairs(minetest.env:get_objects_inside_radius(pos, 8)) do
 		if object:is_player() == false then
 			if leader ~= nil then
@@ -193,6 +176,14 @@ function roll(self)
 			end
 		end
 	end
+
+    --local currentnode = minetest.get_node({x=x,y=y,z=z}).name
+    local forwardnode = minetest.get_node({x=speedx,y=y,z=speedz}).name --the node 1 space in front of it
+    -- minetest.chat_send_player("singleplayer", forwardnode)
+    local upnode      = minetest.get_node({x=speedx+(direction.x),y=speedy+1,z=speedz+(direction.z)}).name    --the node 1 space up + 1 space forwards
+    local downnode    = minetest.get_node({x=pos.x+(direction.x/2),y=speedy-1,z=pos.z+(direction.z/2)}).name    --the node 1 space down + 1 space forwards
+    local nodeahead   = minetest.get_node({x=pos.x+(direction.x/2),y=pos.y+(direction.y/2),z=pos.z+(direction.z/2)}).name --1 rounded node ahead
+
 	--move minecart down
 	if forwardnode ~= "default:rail" and downnode == "default:rail" and direction.y == 0 then
 		direction.y = -1
@@ -262,13 +253,89 @@ function roll(self)
 	end
 
 	self.object:moveto(movement)
-	self.object:get_luaentity().direction = direction
+
+
+
+    -- If a player is currenting driving the train
+    -- self.player is first set in on_rightclick
+    if self.player then
+        local ctrl = self.player:get_player_control()
+        if ctrl.up and self.fuel > 0 then
+            if speed == 0 then
+                if traveling_forwards == false then
+                    if direction.x == 1 then
+                        direction.x = -1
+                    elseif direction.x == -1 then
+                        direction.x = 1
+                    elseif direction.z == 1 then
+                        direction.z = -1
+                    elseif direction.z == -1 then
+                        direction.z = 1
+                    end
+                    traveling_forwards = true
+                end
+            end
+            -- The cart can only go 0.48 before it can no longer follow the tracks
+            -- which is why 0.49 is the hardcoded max speed
+            -- TODO make this a config option
+            if speed + 0.01 < 0.49 and traveling_forwards == true then
+                speed = speed + 0.01
+            elseif traveling_forwards == false then
+                -- Check speed to see if we should stop competely or not
+                if 0 >= speed - 0.01 then
+                    speed = 0
+                else
+                    speed = speed - 0.01
+                end
+            end
+        elseif ctrl.down then
+            if speed == 0 then
+                if traveling_forwards == true then
+                    if direction.x == 1 then
+                        direction.x = -1
+                    elseif direction.x == -1 then
+                        direction.x = 1
+                    elseif direction.z == 1 then
+                        direction.z = -1
+                    elseif direction.z == -1 then
+                        direction.z = 1
+                    end
+                    traveling_forwards = false
+                end
+            end
+            if speed + 0.01 < 0.49 and traveling_forwards == false then
+                speed = speed + 0.01
+            elseif traveling_forwards == true then
+                -- Check speed to see if we should stop competely or not
+                if 0 >= speed - 0.01 then
+                    speed = 0
+                else
+                    speed = speed - 0.01
+                end
+            end
+        end
+    end
+    if 0 >= self.fuel then
+        -- If we have no fuel to burn start slowing down
+        if speed > 0 then
+            -- a check to see if we need to stop competely
+            if 0 > speed - 0.003 then
+                speed = 0
+            else
+                speed = speed - 0.003
+            end
+        end
+    end
+    if fuel > 0 then
+        -- TODO Tweak fuel usage
+        self.fuel = fuel - speed
+    else
+        fuel = 0
+    end
+
 	self.object:get_luaentity().speed = speed
-
+    self.object:get_luaentity().direction = direction
 end
-
-
-
 
 --set the minecart's direction
 function set_direction(self)
@@ -277,6 +344,8 @@ function set_direction(self)
 	local right     = minetest.get_node({x=pos.x,y=pos.y,z=pos.z - 1}).name
 	local forward   = minetest.get_node({x=pos.x + 1,y=pos.y,z=pos.z}).name
 	local backward  = minetest.get_node({x=pos.x - 1,y=pos.y,z=pos.z}).name
+    traveling_forwards = true
+    minetest.chat_send_player("singleplayer","test")
 	local direction = {x=0,y=0,z=0}
 	if left == "default:rail" then
 		direction.z = 1
@@ -291,15 +360,19 @@ function set_direction(self)
 end
 
 
-
-
-
-minetest.override_item("default:stick", {
-	on_place = function(itemstack, placer, pointed_thing)
-		local nodename = minetest.get_node(pointed_thing.under).name
-
-		if nodename == "default:rail" then
-			minetest.add_entity(pointed_thing.under, "trains:minecart")
-		end
-	end,
+minetest.register_tool("railtest:crowbar", {
+        description = "Crowbar",
+        inventory_image = "default_stick.png",
+        tool_capabilities = {
+            max_drop_level=3,
+            groupcaps= {
+                cracky={times={[1]=4.00, [2]=1.50, [3]=1.00}, uses=70, maxlevel=1}
+            }
+        },
+        on_use = function(itemstack, player, pointed_thing)
+            local nodename = minetest.get_node(pointed_thing.under).name
+            if nodename == "default:rail" then
+                minetest.add_entity(pointed_thing.under, "railtest:minecart")
+            end
+                end
 })
