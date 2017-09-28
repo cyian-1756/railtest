@@ -252,17 +252,13 @@ function roll(self)
 		end
 	end
 
-	self.object:moveto(movement)
-
-
-
     -- If a player is currenting driving the train
     -- self.player is first set in on_rightclick
     if self.player then
         local ctrl = self.player:get_player_control()
         if ctrl.up and self.fuel > 0 then
             if speed == 0 then
-                if traveling_forwards == false then
+                if self.traveling_forwards == false then
                     if direction.x == 1 then
                         direction.x = -1
                     elseif direction.x == -1 then
@@ -272,15 +268,15 @@ function roll(self)
                     elseif direction.z == -1 then
                         direction.z = 1
                     end
-                    traveling_forwards = true
+                    self.traveling_forwards = true
                 end
             end
             -- The cart can only go 0.48 before it can no longer follow the tracks
             -- which is why 0.49 is the hardcoded max speed
             -- TODO make this a config option
-            if speed + 0.01 < 0.49 and traveling_forwards == true then
+            if speed + 0.01 < 0.49 and self.traveling_forwards == true then
                 speed = speed + 0.01
-            elseif traveling_forwards == false then
+            elseif self.traveling_forwards == false then
                 -- Check speed to see if we should stop competely or not
                 if 0 >= speed - 0.01 then
                     speed = 0
@@ -289,8 +285,9 @@ function roll(self)
                 end
             end
         elseif ctrl.down then
+            -- Only change the direction if we're stopped
             if speed == 0 then
-                if traveling_forwards == true then
+                if self.traveling_forwards == true then
                     if direction.x == 1 then
                         direction.x = -1
                     elseif direction.x == -1 then
@@ -300,12 +297,12 @@ function roll(self)
                     elseif direction.z == -1 then
                         direction.z = 1
                     end
-                    traveling_forwards = false
+                    self.traveling_forwards = false
                 end
             end
-            if speed + 0.01 < 0.49 and traveling_forwards == false then
+            if speed + 0.01 < 0.49 and self.traveling_forwards == false then
                 speed = speed + 0.01
-            elseif traveling_forwards == true then
+            elseif self.traveling_forwards == true then
                 -- Check speed to see if we should stop competely or not
                 if 0 >= speed - 0.01 then
                     speed = 0
@@ -330,11 +327,15 @@ function roll(self)
         -- TODO Tweak fuel usage
         self.fuel = fuel - speed
     else
+        if self.player then
+            minetest.chat_send_player(self.player:get_player_name(), "[railtest] Cart is out of fuel!")
+        end
         fuel = 0
     end
-
 	self.object:get_luaentity().speed = speed
     self.object:get_luaentity().direction = direction
+    self.object:moveto(movement)
+
 end
 
 --set the minecart's direction
@@ -344,8 +345,7 @@ function set_direction(self)
 	local right     = minetest.get_node({x=pos.x,y=pos.y,z=pos.z - 1}).name
 	local forward   = minetest.get_node({x=pos.x + 1,y=pos.y,z=pos.z}).name
 	local backward  = minetest.get_node({x=pos.x - 1,y=pos.y,z=pos.z}).name
-    traveling_forwards = true
-    minetest.chat_send_player("singleplayer","test")
+    self.traveling_forwards = true
 	local direction = {x=0,y=0,z=0}
 	if left == "default:rail" then
 		direction.z = 1
