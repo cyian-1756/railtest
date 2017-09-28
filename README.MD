@@ -25,5 +25,6 @@ Punch the cart to destroy it
 
 Sneak (Default left shift) and right click the cart while holding default:coal_lump to fuel the cart
 
+### Credits
 
-Based on [trains](https://github.com/jordan4ibanez/trains)
+Based on [trains](https://github.com/jordan4ibanez/trains) by jordan4ibanez
