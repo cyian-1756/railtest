@@ -53,7 +53,7 @@ fuel_burn_time["charcoal:charcoal_block"] = 900
 
 
 --punch function
-function minecart.on_punch(self)
+function minecart.on_punch(self, puncher)
     if not puncher or not puncher:is_player() then
 		return
 	end
