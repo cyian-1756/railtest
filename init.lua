@@ -77,7 +77,7 @@ function minecart.on_rightclick(self, clicker)
 	--sneak to link/fuel minecarts
 	if clicker:get_player_control().sneak == true then
         local player_held_item = clicker:get_wielded_item():get_name()
-        -- check if the item the player is holding is a fuel we can use
+        -- if fuel_burn_time[player_held_item] is nil then the player is right clicking when holding something that can't be used as fuel
         if fuel_burn_time[player_held_item] ~= nil then
             if self.fuel + fuel_burn_time[player_held_item] <= minecart.max_fuel then
                 self.fuel = self.fuel + fuel_burn_time[player_held_item]
@@ -87,7 +87,7 @@ function minecart.on_rightclick(self, clicker)
                 clicker:set_wielded_item({name=player_held_item, count=stack_total - 1, wear=0, metadata=""})
                 return
             else
-                minetest.chat_send_player(clicker:get_player_name(), "[railtest] Adding this much fuel would go over the trains fuel limit")
+                minetest.chat_send_player(clicker:get_player_name(), "[railtest] Adding this much fuel would go over the trains max fuel")
                 return
             end
         end
@@ -389,7 +389,7 @@ function set_direction(self)
 end
 
 minetest.register_craftitem("railtest:cart", {
-	description = "Cart",
+	description = "Drivable cart",
 	inventory_image = minetest.inventorycube("cart_top.png", "cart_side.png", "cart_side.png"),
 	wield_image = "cart_side.png",
 
@@ -417,10 +417,4 @@ minetest.register_tool("railtest:crowbar", {
                 cracky={times={[1]=4.00, [2]=1.50, [3]=1.00}, uses=70, maxlevel=1}
             }
         },
-        on_use = function(itemstack, player, pointed_thing)
-            local nodename = minetest.get_node(pointed_thing.under).name
-            if nodename == "default:rail" then
-                minetest.add_entity(pointed_thing.under, "railtest:minecart")
-            end
-                end
 })
