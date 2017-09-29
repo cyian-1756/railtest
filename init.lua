@@ -237,8 +237,8 @@ function roll(self)
 			direction.y = 0
 		end
 	--move minecart up
-elseif is_rail(nodeahead) == true and is_rail(upnode) == true and direction.y == 0 then
-		direction.y = 1
+    elseif is_rail(nodeahead) == true and is_rail(upnode) == true and direction.y == 0 then
+    		direction.y = 1
 	elseif direction.y == 1 then
 		movement = {x=speedx,y=speedy,z=speedz}
 		--keep cart on center of rail
@@ -252,7 +252,7 @@ elseif is_rail(nodeahead) == true and is_rail(upnode) == true and direction.y ==
 			direction.y = 0
 		end
 	--move the cart forwards
-elseif is_rail(nodeahead) == true and is_rail(upnode) == false and direction.y == 0 or (is_rail(nodeahead) == false and is_rail(downnode) == true) then --and upnode ~= "default:rail" and is_rail(downnode) == false and direction.y == 0 then
+    elseif is_rail(nodeahead) == true and is_rail(upnode) == false and direction.y == 0 or (is_rail(nodeahead) == false and is_rail(downnode) == true) then --and upnode ~= "default:rail" and is_rail(downnode) == false and direction.y == 0 then
 		if math.abs(speedx) ~= 0 or math.abs(speedz) ~= 0 then
 			movement = {x=speedx,y=speedy,z=speedz}
 			--keep cart on center of rail
@@ -263,7 +263,7 @@ elseif is_rail(nodeahead) == true and is_rail(upnode) == false and direction.y =
 			end
 		end
 	--turn and handle T junctions
-elseif is_rail(nodeahead) == false and is_rail(upnode) == false and is_rail(downnode) == false then
+    elseif is_rail(nodeahead) == false and is_rail(upnode) == false and is_rail(downnode) == false then
 		if math.abs(direction.x) > 0 then
 			local left  = minetest.get_node({x=pos.x,y=pos.y,z=pos.z + 1}).name
 			local right = minetest.get_node({x=pos.x,y=pos.y,z=pos.z - 1}).name
