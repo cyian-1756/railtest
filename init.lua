@@ -390,8 +390,8 @@ end
 
 minetest.register_craftitem("railtest:cart", {
 	description = "Cart",
-	inventory_image = minetest.inventorycube("default_cart_top.png", "default_cart_side.png", "default_cart_side.png"),
-	wield_image = "default_cart_side.png",
+	inventory_image = minetest.inventorycube("cart_top.png", "cart_side.png", "cart_side.png"),
+	wield_image = "cart_side.png",
 
 	on_place = function(itemstack, placer, pointed_thing)
 		if not pointed_thing.type == "node" then
