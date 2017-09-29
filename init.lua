@@ -42,26 +42,52 @@ local minecart   = {
 	speed        = 0, --dpt (distance per tick, speed measurement)
     -- The max amount of fuel this minecart can hold
     max_fuel = 2000,
+    -- A table containing each item that can be used as fuel and how much fuel it provides
 }
+
+local fuel_burn_time = {}
+fuel_burn_time["default:coal_lump"] = 100
+fuel_burn_time["default:coalblock"] = 900
+fuel_burn_time["charcoal:charcoal_lump"] = 100
+fuel_burn_time["charcoal:charcoal_block"] = 900
+
+
 --punch function
 function minecart.on_punch(self)
-	self.object:remove()
+    if not puncher or not puncher:is_player() then
+		return
+	end
+
+    if puncher:get_player_control().sneak then
+		self.object:remove()
+		local inv = puncher:get_inventory()
+		if minetest.setting_getbool("creative_mode") then
+			if not inv:contains_item("main", "railtest:cart") then
+				inv:add_item("main", "railtest:cart")
+			end
+		else
+			inv:add_item("main", "railtest:cart")
+		end
+		return
+	end
 end
 
 --right click function
 function minecart.on_rightclick(self, clicker)
 	--sneak to link/fuel minecarts
 	if clicker:get_player_control().sneak == true then
-        if clicker:get_wielded_item():get_name() == "default:coal_lump" then
-            if self.fuel + 100 <= minecart.max_fuel then
-                self.fuel = self.fuel + 100
+        local player_held_item = clicker:get_wielded_item():get_name()
+        -- check if the item the player is holding is a fuel we can use
+        if fuel_burn_time[player_held_item] ~= nil then
+            if self.fuel + fuel_burn_time[player_held_item] <= minecart.max_fuel then
+                self.fuel = self.fuel + fuel_burn_time[player_held_item]
                 minetest.chat_send_player(clicker:get_player_name(), "[railtest] Train has " ..self.fuel.. " fuel")
                 -- This work around is here because for some reason :take_item() doesn't work here
                 local stack_total = clicker:get_wielded_item():get_count()
-                clicker:set_wielded_item({name="default:coal_lump", count=stack_total - 1, wear=0, metadata=""})
+                clicker:set_wielded_item({name=player_held_item, count=stack_total - 1, wear=0, metadata=""})
                 return
             else
-                minetest.chat_send_player(clicker:get_player_name(), "[railtest] Train is already at full fuel")
+                minetest.chat_send_player(clicker:get_player_name(), "[railtest] Adding this much fuel would go over the trains fuel limit")
                 return
             end
         end
@@ -230,7 +256,7 @@ elseif is_rail(nodeahead) == true and is_rail(upnode) == false and direction.y =
 			end
 		end
 	--turn and handle T junctions
-	elseif is_rail(nodeahead) == false and is_rail(upnode) == fals and is_rail(downnode) == false then
+elseif is_rail(nodeahead) == false and is_rail(upnode) == false and is_rail(downnode) == false then
 		if math.abs(direction.x) > 0 then
 			local left  = minetest.get_node({x=pos.x,y=pos.y,z=pos.z + 1}).name
 			local right = minetest.get_node({x=pos.x,y=pos.y,z=pos.z - 1}).name
@@ -277,7 +303,7 @@ elseif is_rail(nodeahead) == true and is_rail(upnode) == false and direction.y =
             -- The cart can only go 0.48 before it can no longer follow the tracks
             -- which is why 0.49 is the hardcoded max speed
             -- TODO make this a config option
-            if speed + 0.01 < 0.49 and self.traveling_forwards == true  and self.fuel > 0 then
+            if speed + 0.01 < 0.49 and self.traveling_forwards == true and self.fuel > 0 then
                 speed = speed + 0.01
             elseif self.traveling_forwards == false and self.fuel > 0 then
                 -- Check speed to see if we should stop competely or not
