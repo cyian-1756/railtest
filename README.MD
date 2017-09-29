@@ -7,11 +7,14 @@ This mod adds drivable carts fueled by coal (Can be spawned on default:rail usin
 ### TODO
 
 * chest carts
-* New model for self propelled carts
+* ~~New model for self propelled carts~~ Done thanks to tobyplowy
 * Persistence inventory for self propelled carts
 * ~~Makes carts able to move forwards and backwards~~ Done
-* Improve logic to cut down on lag
+* ~~Improve logic to cut down on lag~~ Done
 * Add crafting recipe for self propelled carts
+* Add electric carts that tie in with technic
+* Add charging rails for electric carts
+* Make brake rails slow carts
 
 ### Controls
 
@@ -21,9 +24,9 @@ Forward (Default w) to move the cart forwards
 
 Backwards (Default s) to move the cart backwards
 
-Punch the cart to destroy it
+Sneak and punch the cart to pick it up
 
-Sneak (Default left shift) and right click the cart while holding default:coal_lump to fuel the cart
+Sneak (Default left shift) and right click the cart while holding default:coal_lump, default:coalblock, charcoal:charcoal_lump or charcoal:charcoal_block to fuel the cart
 
 ### Credits
 
