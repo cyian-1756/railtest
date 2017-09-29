@@ -307,9 +307,6 @@ function roll(self)
                     self.traveling_forwards = true
                 end
             end
-            -- The cart can only go 0.48 before it can no longer follow the tracks
-            -- which is why 0.49 is the hardcoded max speed
-            -- TODO make this a config option
             if speed + 0.01 < self.max_speed and self.traveling_forwards == true and self.fuel > 0 then
                 speed = speed + 0.01
             elseif self.traveling_forwards == false and self.fuel > 0 then
