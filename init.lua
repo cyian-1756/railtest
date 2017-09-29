@@ -42,6 +42,8 @@ local minecart   = {
 	speed        = 0, --dpt (distance per tick, speed measurement)
     -- The max amount of fuel this minecart can hold
     max_fuel = 2000,
+    -- The maxium about of coolant that the train can hold
+    max_coolant = 2000,
 }
 
 -- A table containing each item that can be used as fuel and how much fuel it provides
