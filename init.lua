@@ -232,7 +232,7 @@ function roll(self)
 			movement.x = x
 		end
 		--when it gets to the bottom of the rail, stop moving down
-		local noder = minetest.get_node({x=speedx,y=pos.y-0.5-(speed*2),z=speedz}).name
+		local noder = minetest.get_node({x=speedx,y=pos.y-0.5-(speed*2),z=speedz})
 		if is_rail(noder) == false then
 			direction.y = 0
 		end
