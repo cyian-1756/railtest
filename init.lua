@@ -44,6 +44,8 @@ local minecart   = {
     max_fuel = 2000,
     -- The maxium about of coolant that the train can hold
     max_coolant = 2000,
+    -- The max distance per tick the train can go
+    max_speed = 0.48
 }
 
 -- A table containing each item that can be used as fuel and how much fuel it provides
@@ -81,7 +83,7 @@ function minecart.on_rightclick(self, clicker)
         local player_held_item = clicker:get_wielded_item():get_name()
         -- if fuel_burn_time[player_held_item] is nil then the player is right clicking when holding something that can't be used as fuel
         if fuel_burn_time[player_held_item] ~= nil then
-            if self.fuel + fuel_burn_time[player_held_item] <= minecart.max_fuel then
+            if self.fuel + fuel_burn_time[player_held_item] <= self.max_fuel then
                 self.fuel = self.fuel + fuel_burn_time[player_held_item]
                 minetest.chat_send_player(clicker:get_player_name(), "[railtest] Train has " ..self.fuel.. " fuel")
                 -- This work around is here because for some reason :take_item() doesn't work here
@@ -115,6 +117,9 @@ end
 
 --when the minecart is created in world
 function minecart.on_activate(self, staticdata, dtime_s)
+    self.max_coolant = minecart.max_coolant
+    self.max_speed = minecart.max_speed
+    self.max_fuel = minecart.max_fuel
 	set_direction(self)
 end
 
@@ -305,7 +310,7 @@ elseif is_rail(nodeahead) == false and is_rail(upnode) == false and is_rail(down
             -- The cart can only go 0.48 before it can no longer follow the tracks
             -- which is why 0.49 is the hardcoded max speed
             -- TODO make this a config option
-            if speed + 0.01 < 0.49 and self.traveling_forwards == true and self.fuel > 0 then
+            if speed + 0.01 < self.max_speed and self.traveling_forwards == true and self.fuel > 0 then
                 speed = speed + 0.01
             elseif self.traveling_forwards == false and self.fuel > 0 then
                 -- Check speed to see if we should stop competely or not
