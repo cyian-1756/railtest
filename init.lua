@@ -42,9 +42,9 @@ local minecart   = {
 	speed        = 0, --dpt (distance per tick, speed measurement)
     -- The max amount of fuel this minecart can hold
     max_fuel = 2000,
-    -- A table containing each item that can be used as fuel and how much fuel it provides
 }
 
+-- A table containing each item that can be used as fuel and how much fuel it provides
 local fuel_burn_time = {}
 fuel_burn_time["default:coal_lump"] = 100
 fuel_burn_time["default:coalblock"] = 900
