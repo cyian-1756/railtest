@@ -280,3 +280,43 @@ function roll(self)
     return speed, direction, movement, fuel
 
 end
+
+function handle_rightclick(self, clicker, fuel_burn_time)
+    --sneak to link/fuel minecarts
+    if clicker:get_player_control().sneak == true then
+        local player_held_item = clicker:get_wielded_item():get_name()
+        -- if fuel_burn_time[player_held_item] is nil then the player is right clicking when holding something that can't be used as fuel
+        if fuel_burn_time[player_held_item] ~= nil then
+            if self.fuel + fuel_burn_time[player_held_item] <= self.max_fuel then
+                self.fuel = self.fuel + fuel_burn_time[player_held_item]
+                minetest.chat_send_player(clicker:get_player_name(), "[railtest] Train has " ..self.fuel.. " fuel")
+                -- This work around is here because for some reason :take_item() doesn't work here
+                local stack_total = clicker:get_wielded_item():get_count()
+                clicker:set_wielded_item({name=player_held_item, count=stack_total - 1, wear=0, metadata=""})
+                return
+            else
+                minetest.chat_send_player(clicker:get_player_name(), "[railtest] Adding this much fuel would go over the trains max fuel")
+                return
+            end
+        end
+		if cart_link[clicker:get_player_name()] == nil then
+			cart_link[clicker:get_player_name()] = self.object:get_luaentity()
+		else
+			self.leader = cart_link[clicker:get_player_name()]
+			cart_link[clicker:get_player_name()] = nil
+            -- TODO set the speed of linked carts to that of the leading cart
+			self.speed     = 0.2
+			minetest.chat_send_player(clicker:get_player_name(), "[railtest] Carts linked!")
+		end
+	else
+		if self.player then
+			self.player:set_detach()
+            self.player = nil
+		else
+			self.speed = 0.0
+            self.player = clicker
+			clicker:set_attach(self.object, "", {x=0,y=0,z=0}, {x=0,y=0,z=0})
+		end
+	end
+    return self
+end
