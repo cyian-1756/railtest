@@ -35,4 +35,6 @@ Sneak (Default left shift) and right click the cart while holding default:coal_l
 
 ### License
 
-Unless otherwise stated all code is under the GPL V2 and all models and textures are under CC-BY-SA 3.0 UNPORTED
+Unless otherwise stated all models and textures are under CC-BY-SA 3.0 UNPORTED
+
+The code is currently not under any license, until I hear back from jordan4ibanez
