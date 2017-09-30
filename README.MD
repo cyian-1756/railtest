@@ -30,8 +30,8 @@ Sneak (Default left shift) and right click the cart while holding default:coal_l
 
 ### Credits
 
-Based on [trains](https://github.com/jordan4ibanez/trains) by jordan4ibanez
-tobyplowy (aka toby109tt) for making the models and textures
+* Based on [trains](https://github.com/jordan4ibanez/trains) by jordan4ibanez
+* tobyplowy (aka toby109tt) for making the models and textures
 
 ### License
 
