@@ -2,7 +2,7 @@
 
 ### A railway mod for minetest
 
-This mod adds drivable carts fueled by coal (Can be spawned on default:rail using a railtest:crowbar)
+This mod adds drivable carts fueled by coal (Can be spawned on any node in the rail group using railtest:cart)
 
 ### TODO
 
