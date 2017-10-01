@@ -81,6 +81,8 @@ function handle_input(self, direction, speed)
                 speed = speed - 0.01
             end
         end
+    elseif ctrl.jump and self.fuel > 0 then
+        speed = decrease_speed(0.02, speed)
     end
     return speed, direction
 end
@@ -104,8 +106,6 @@ function roll(self)
     -- The rail the cart is currently on
     local current_rail = minetest.get_node(pos)
 
-
-
     local x = math.floor(pos.x + 0.5)
     local y = math.floor(pos.y + 0.5) --the center of the node
     local z = math.floor(pos.z + 0.5)
@@ -116,61 +116,61 @@ function roll(self)
     -----
     local movement  = {x=pos.x,y=pos.y,z=pos.z}
 
-    --this is the prototype for carts to follow eachother
-    for _,object in ipairs(minetest.env:get_objects_inside_radius(pos, 8)) do
-        if object:is_player() == false then
-            if leader ~= nil then
-                if object:get_luaentity() == leader then
-                    --print("test")
-                    local pos2 = object:getpos()
-                    local difx = pos.x - pos2.x
-                    local difz = pos.z - pos2.z
-                    local distance = vector.distance(pos,pos2)
-                    --cancel the rest of the collision detection
-                    if distance < 1 then
-                        return
-                    end
-                    if direction.x > 0 then
-                        --calculate distance into speed
-                        if difx > 0 then
-                            direction.x = -1
-                        end
-                    elseif direction.x < 0 then
-                        --calculate distance into speed
-                        if difx < 0 then
-                            direction.x = 1
-                        end
-                    elseif direction.z > 0 then
-                        --calculate distance into speed
-                        if difz > 0 then
-                            direction.z = -1
-                        end
-                    elseif direction.z < 0 then
-                        --calculate distance into speed
-                        if difz < 0 then
-                            direction.z = 1
-                        end
-                    end
-                    --try to correct for t junction
-                    if math.abs(difx) < speed then
-                        direction.x = 0
-                        if difz > 0 then
-                            direction.z = -1
-                        elseif difz < 0 then
-                            direction.z = 1
-                        end
-                    elseif math.abs(difz) < speed then
-                        direction.z = 0
-                        if difx > 0 then
-                            direction.x  = -1
-                        elseif difx < 0 then
-                            direction.x = 1
-                        end
-                    end
-                end
-            end
-        end
-    end
+    -- --this is the prototype for carts to follow eachother
+    -- for _,object in ipairs(minetest.env:get_objects_inside_radius(pos, 8)) do
+    --     if object:is_player() == false then
+    --         if leader ~= nil then
+    --             if object:get_luaentity() == leader then
+    --                 --print("test")
+    --                 local pos2 = object:getpos()
+    --                 local difx = pos.x - pos2.x
+    --                 local difz = pos.z - pos2.z
+    --                 local distance = vector.distance(pos,pos2)
+    --                 --cancel the rest of the collision detection
+    --                 if distance < 1 then
+    --                     return
+    --                 end
+    --                 if direction.x > 0 then
+    --                     --calculate distance into speed
+    --                     if difx > 0 then
+    --                         direction.x = -1
+    --                     end
+    --                 elseif direction.x < 0 then
+    --                     --calculate distance into speed
+    --                     if difx < 0 then
+    --                         direction.x = 1
+    --                     end
+    --                 elseif direction.z > 0 then
+    --                     --calculate distance into speed
+    --                     if difz > 0 then
+    --                         direction.z = -1
+    --                     end
+    --                 elseif direction.z < 0 then
+    --                     --calculate distance into speed
+    --                     if difz < 0 then
+    --                         direction.z = 1
+    --                     end
+    --                 end
+    --                 --try to correct for t junction
+    --                 if math.abs(difx) < speed then
+    --                     direction.x = 0
+    --                     if difz > 0 then
+    --                         direction.z = -1
+    --                     elseif difz < 0 then
+    --                         direction.z = 1
+    --                     end
+    --                 elseif math.abs(difz) < speed then
+    --                     direction.z = 0
+    --                     if difx > 0 then
+    --                         direction.x  = -1
+    --                     elseif difx < 0 then
+    --                         direction.x = 1
+    --                     end
+    --                 end
+    --             end
+    --         end
+    --     end
+    -- end
 
     --local currentnode = minetest.get_node({x=x,y=y,z=z}).name
     local forwardnode = minetest.get_node({x=speedx,y=y,z=speedz}) --the node 1 space in front of it
@@ -253,12 +253,14 @@ function roll(self)
         -- Handle any input from the player such as increase/decreasing speed
         speed, direction = handle_input(self, direction, speed)
     end
+
     if 0 >= self.fuel then
         -- If we have no fuel to burn start slowing down
         if speed > 0 then
             speed = decrease_speed(0.003, speed)
         end
     end
+
     -- Handle fuel usage
     if fuel > 0 then
         -- TODO Tweak fuel usage
@@ -269,6 +271,7 @@ function roll(self)
         end
         fuel = 0
     end
+
     -- Handles any effects the current rail might have on the cart (braking, refueling/charging, increasing speed ect)
     speed, fuel = handle_rail_effects(self, fuel, speed, current_rail)
     return speed, direction, movement, fuel
@@ -288,13 +291,17 @@ function handle_punch(self, puncher, minecart)
         else
             inv:add_item("main", "railtest:" .. minecart.item_name)
         end
-        return
+    end
+    if puncher:get_wielded_item():get_name() == "railtest:crowbar" then
+        minetest.chat_send_player("singleplayer", "Speed")
+        self.speed = increase_speed(0.05, speed, self)
+        return self
     end
 end
 
 function decrease_speed(num, speed)
     if 0 > speed - num then
-        speed = 0
+        return 0
     else
         return speed - num
     end
@@ -335,15 +342,39 @@ function handle_rightclick(self, clicker, fuel_burn_time)
             self.speed     = 0.2
             minetest.chat_send_player(clicker:get_player_name(), "[railtest] Carts linked!")
         end
-    else
+    elseif clicker:get_wielded_item():get_name() ~= "railtest:crowbar" then
         if self.player then
             self.player:set_detach()
             self.player = nil
         else
-            self.speed = 0.0
             self.player = clicker
             clicker:set_attach(self.object, "", {x=0,y=0,z=0}, {x=0,y=0,z=0})
         end
+    elseif clicker:get_wielded_item():get_name() == "railtest:crowbar" then
+        minetest.chat_send_player("singleplayer", "Speed")
+        self.speed = decrease_speed(0.05, speed, self)
+        return self
     end
     return self
+end
+
+function add_spawn_item(minecart)
+    minetest.register_craftitem("railtest:" .. minecart.item_name, {
+        description = minecart.description,
+        inventory_image = minecart.inventory_image,
+        wield_image =  minecart.wield_image,
+
+        on_place = function(itemstack, placer, pointed_thing)
+            if not pointed_thing.type == "node" then
+                return
+            end
+            if cart_func:is_rail(pointed_thing.under) then
+                minetest.env:add_entity(pointed_thing.under, "railtest:" .. minecart.item_name .. "_entity")
+                if not minetest.setting_getbool("creative_mode") then
+                    itemstack:take_item()
+                end
+                return itemstack
+            end
+        end,
+    })
 end
