@@ -84,11 +84,7 @@ end
 
 function handle_rail_effects(self, fuel, speed, current_rail)
     if current_rail.name == "carts:brakerail" then
-        if speed - 0.005 > 0 then
-            speed = speed - 0.005
-        else
-            speed = 0
-        end
+        speed = decrease_speed(0.005, speed)
     end
     return speed, fuel
 end
@@ -257,12 +253,7 @@ function roll(self)
     if 0 >= self.fuel then
         -- If we have no fuel to burn start slowing down
         if speed > 0 then
-            -- a check to see if we need to stop competely
-            if 0 > speed - 0.003 then
-                speed = 0
-            else
-                speed = speed - 0.003
-            end
+            speed = decrease_speed(0.003, speed)
         end
     end
     -- Handle fuel usage
@@ -278,7 +269,22 @@ function roll(self)
     -- Handles any effects the current rail might have on the cart (braking, refueling/charging, increasing speed ect)
     speed, fuel = handle_rail_effects(self, fuel, speed, current_rail)
     return speed, direction, movement, fuel
+end
 
+function decrease_speed(num, speed)
+    if 0 > speed - num then
+        speed = 0
+    else
+        return speed - num
+    end
+end
+
+function increase_speed(num, speed, self)
+    if speed + num > self.max_speed then
+        return speed
+    else
+        return speed + num
+    end
 end
 
 function handle_rightclick(self, clicker, fuel_burn_time)
