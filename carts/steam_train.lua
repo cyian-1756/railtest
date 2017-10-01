@@ -15,7 +15,8 @@ local minecart   = {
     -- The maxium about of coolant that the train can hold
     max_coolant = 2000,
     -- The max distance per tick the train can go
-    max_speed = 0.48
+    max_speed = 0.48,
+    item_name = "steam_train"
 }
 cart_link = {}
 
@@ -29,22 +30,7 @@ fuel_burn_time["charcoal:charcoal_block"] = 900
 
 --punch function
 function minecart.on_punch(self, puncher)
-    if not puncher or not puncher:is_player() then
-		return
-	end
-
-    if puncher:get_player_control().sneak then
-		self.object:remove()
-		local inv = puncher:get_inventory()
-		if minetest.setting_getbool("creative_mode") then
-			if not inv:contains_item("main", "railtest:steam_train") then
-				inv:add_item("main", "railtest:steam_train")
-			end
-		else
-			inv:add_item("main", "railtest:steam_train")
-		end
-		return
-	end
+    handle_punch(self, puncher, minecart)
 end
 
 --right click function

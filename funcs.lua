@@ -1,4 +1,7 @@
 function is_rail(node)
+    if node == nil then
+        return false
+    end
 	local nn = node.name
 	return minetest.get_item_group(nn, "rail") ~= 0
 end
@@ -6,19 +9,19 @@ end
 --set the minecart's direction
 function set_direction(self)
 	local pos       = self.object:getpos()
-	local left      = minetest.get_node({x=pos.x,y=pos.y,z=pos.z + 1}).name
-	local right     = minetest.get_node({x=pos.x,y=pos.y,z=pos.z - 1}).name
-	local forward   = minetest.get_node({x=pos.x + 1,y=pos.y,z=pos.z}).name
-	local backward  = minetest.get_node({x=pos.x - 1,y=pos.y,z=pos.z}).name
+	local left      = minetest.get_node({x=pos.x,y=pos.y,z=pos.z + 1})
+	local right     = minetest.get_node({x=pos.x,y=pos.y,z=pos.z - 1})
+	local forward   = minetest.get_node({x=pos.x + 1,y=pos.y,z=pos.z})
+	local backward  = minetest.get_node({x=pos.x - 1,y=pos.y,z=pos.z})
     self.traveling_forwards = true
 	local direction = {x=0,y=0,z=0}
 	if is_rail(left) then
 		direction.z = 1
-	elseif right == "default:rail" then
+	elseif is_rail(right) then
 		direction.z = -1
-	elseif forward == "default:rail" then
+	elseif is_rail(forward) then
 		direction.x = 1
-	elseif backward == "default:rail" then
+	elseif is_rail(backward) then
 		direction.x = -1
 	end
 	self.object:get_luaentity().direction = direction
@@ -269,6 +272,24 @@ function roll(self)
     -- Handles any effects the current rail might have on the cart (braking, refueling/charging, increasing speed ect)
     speed, fuel = handle_rail_effects(self, fuel, speed, current_rail)
     return speed, direction, movement, fuel
+end
+
+function handle_punch(self, puncher, minecart)
+    if not puncher or not puncher:is_player() then
+		return
+	end
+    if puncher:get_player_control().sneak then
+		self.object:remove()
+		local inv = puncher:get_inventory()
+		if minetest.setting_getbool("creative_mode") then
+			if not inv:contains_item("main", "railtest:" .. minecart.item_name) then
+				inv:add_item("main", "railtest:" .. minecart.item_name)
+			end
+		else
+			inv:add_item("main", "railtest:" .. minecart.item_name)
+		end
+		return
+	end
 end
 
 function decrease_speed(num, speed)

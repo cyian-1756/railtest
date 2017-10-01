@@ -7,7 +7,6 @@ local minecart   = {
 	visual_size = {x=1, y=1},
 	textures = {"carts_cart.png"},
 	automatic_face_movement_dir = 0.0,
-
 	direction    = {x=0,y=0,z=0},
 	speed        = 0, --dpt (distance per tick, speed measurement)
     -- The max amount of fuel this minecart can hold
@@ -15,7 +14,8 @@ local minecart   = {
     -- The maxium about of coolant that the train can hold
     max_coolant = 2000,
     -- The max distance per tick the train can go
-    max_speed = 0.48
+    max_speed = 0.48,
+    item_name = "steam_powered_cart"
 }
 cart_link = {}
 
@@ -26,25 +26,9 @@ fuel_burn_time["default:coalblock"] = 900
 fuel_burn_time["charcoal:charcoal_lump"] = 100
 fuel_burn_time["charcoal:charcoal_block"] = 900
 
-
 --punch function
 function minecart.on_punch(self, puncher)
-    if not puncher or not puncher:is_player() then
-		return
-	end
-
-    if puncher:get_player_control().sneak then
-		self.object:remove()
-		local inv = puncher:get_inventory()
-		if minetest.setting_getbool("creative_mode") then
-			if not inv:contains_item("main", "railtest:steam_powered_cart") then
-				inv:add_item("main", "railtest:steam_powered_cart")
-			end
-		else
-			inv:add_item("main", "railtest:steam_powered_cart")
-		end
-		return
-	end
+    handle_punch(self, puncher)
 end
 
 --right click function
