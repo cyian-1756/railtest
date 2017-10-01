@@ -16,7 +16,10 @@ local minecart   = {
     max_coolant = 2000,
     -- The max distance per tick the train can go
     max_speed = 0.48,
-    item_name = "steam_train"
+    item_name = "steam_train",
+    description = "Steam powered train",
+    inventory_image = "railtest_cart_item_image.png",
+    wield_image = "railtest_cart_item_image.png"
 }
 cart_link = {}
 
@@ -59,4 +62,6 @@ function minecart.on_step(self, dtime)
     self.object:moveto(movement)
 end
 
-minetest.register_entity("railtest:steam_train_entity", minecart)
+add_spawn_item(minecart)
+
+minetest.register_entity("railtest:" .. minecart.item_name .. "_entity", minecart)
