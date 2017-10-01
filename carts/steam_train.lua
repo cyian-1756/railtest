@@ -1,15 +1,15 @@
 
 local minecart   = {
-	physical     = true,
-	collisionbox = {-0.5,-0.5,-0.5, 0.5,0.5,0.5},
-	visual = "mesh",
-	mesh = "railtest_steam_train.b3d",
-	visual_size = {x=1, y=1},
-	textures = {"railtest_steam_train.png"},
-	automatic_face_movement_dir = 0.0,
+    physical     = true,
+    collisionbox = {-0.5,-0.5,-0.5, 0.5,0.5,0.5},
+    visual = "mesh",
+    mesh = "railtest_steam_train.b3d",
+    visual_size = {x=1, y=1},
+    textures = {"railtest_steam_train.png"},
+    automatic_face_movement_dir = 0.0,
 
-	direction    = {x=0,y=0,z=0},
-	speed        = 0, --dpt (distance per tick, speed measurement)
+    direction    = {x=0,y=0,z=0},
+    speed        = 0, --dpt (distance per tick, speed measurement)
     -- The max amount of fuel this minecart can hold
     max_fuel = 2000,
     -- The maxium about of coolant that the train can hold
@@ -35,7 +35,7 @@ end
 
 --right click function
 function minecart.on_rightclick(self, clicker)
-	self = handle_rightclick(self, clicker, fuel_burn_time)
+    self = handle_rightclick(self, clicker, fuel_burn_time)
 end
 
 --when the minecart is created in world
@@ -44,7 +44,7 @@ function minecart.on_activate(self, staticdata, dtime_s)
     self.max_speed = minecart.max_speed
     self.max_fuel = minecart.max_fuel
     self.fuel = 0
-	set_direction(self)
+    set_direction(self)
 end
 
 --what the minecart does in the world
