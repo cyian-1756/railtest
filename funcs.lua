@@ -45,8 +45,8 @@ function handle_input(self, direction, speed)
                 self.traveling_forwards = true
             end
         end
-        if speed + 0.01 < self.max_speed and self.traveling_forwards == true then
-            speed = speed + 0.01
+        if self.traveling_forwards == true then
+            speed = increase_speed(0.01, speed, self)
         elseif self.traveling_forwards == false then
             -- Check speed to see if we should stop competely or not
             if 0 >= speed - 0.01 then
@@ -71,8 +71,8 @@ function handle_input(self, direction, speed)
                 self.traveling_forwards = false
             end
         end
-        if speed + 0.01 < self.max_speed and self.traveling_forwards == false then
-            speed = speed + 0.01
+        if self.traveling_forwards == false then
+            speed = increase_speed(0.01, speed, self)
         elseif self.traveling_forwards == true then
             -- Check speed to see if we should stop competely or not
             if 0 >= speed - 0.01 then
