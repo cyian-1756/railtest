@@ -293,7 +293,6 @@ function handle_punch(self, puncher, minecart)
         end
     end
     if puncher:get_wielded_item():get_name() == "railtest:crowbar" then
-        minetest.chat_send_player("singleplayer", "Speed")
         self.speed = increase_speed(0.05, speed, self)
         return self
     end
