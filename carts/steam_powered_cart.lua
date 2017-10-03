@@ -18,7 +18,12 @@ local minecart   = {
     item_name = "steam_powered_cart",
     description = "Steam powered cart",
     inventory_image = "railtest_cart_item_image.png",
-    wield_image = "railtest_cart_item_image.png"
+    wield_image = "railtest_cart_item_image.png",
+    recipe = {
+		{"", "default:furnace", ""},
+		{"", "carts:cart", ""},
+		{"", "",  ""}
+	}
 }
 cart_link = {}
 
@@ -62,5 +67,6 @@ function minecart.on_step(self, dtime)
 end
 
 add_spawn_item(minecart)
+add_recipe(minecart)
 
 minetest.register_entity("railtest:" .. minecart.item_name .. "_entity", minecart)
