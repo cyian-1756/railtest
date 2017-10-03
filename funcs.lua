@@ -377,3 +377,10 @@ function add_spawn_item(minecart)
         end,
     })
 end
+
+function add_recipe(minecart)
+    minetest.register_craft({
+	output = "railtest:".. minecart.item_name .." 1",
+	recipe = minecart.recipe
+})
+end
