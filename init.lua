@@ -28,25 +28,7 @@ just stopping via clientside until catchup, which is much neater and more digest
 dofile(minetest.get_modpath("railtest").."/funcs.lua")
 dofile(minetest.get_modpath("railtest").."/carts/steam_powered_cart.lua")
 dofile(minetest.get_modpath("railtest").."/carts/steam_train.lua")
-
-minetest.register_craftitem("railtest:steam_powered_cart", {
-    description = "Drivable cart",
-    inventory_image = minetest.inventorycube("cart_top.png", "cart_side.png", "cart_side.png"),
-    wield_image = "cart_side.png",
-
-    on_place = function(itemstack, placer, pointed_thing)
-        if not pointed_thing.type == "node" then
-            return
-        end
-        if cart_func:is_rail(pointed_thing.under) then
-            minetest.env:add_entity(pointed_thing.under, "railtest:steam_powered_cart_entity")
-            if not minetest.setting_getbool("creative_mode") then
-                itemstack:take_item()
-            end
-            return itemstack
-        end
-    end,
-})
+dofile(minetest.get_modpath("railtest").."/carts/mining_drill.lua")
 
 minetest.register_craftitem("railtest:steam_train", {
     description = "Drivable cart",
