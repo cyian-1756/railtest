@@ -1,9 +1,6 @@
-function is_rail(node)
-    if node == nil then
-        return false
-    end
-    local nn = node.name
-    return minetest.get_item_group(nn, "rail") ~= 0
+function is_rail(p)
+	local nn = minetest.get_node(p).name
+	return minetest.get_item_group(nn, "rail") ~= 0
 end
 
 --set the minecart's direction
