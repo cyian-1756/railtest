@@ -367,7 +367,7 @@ function add_spawn_item(minecart)
             if not pointed_thing.type == "node" then
                 return
             end
-            if cart_func:is_rail(pointed_thing.under) then
+            if is_rail(pointed_thing.under) then
                 minetest.env:add_entity(pointed_thing.under, "railtest:" .. minecart.item_name .. "_entity")
                 if not minetest.setting_getbool("creative_mode") then
                     itemstack:take_item()
