@@ -1,6 +1,9 @@
-function is_rail(p)
-	local nn = minetest.get_node(p).name
-	return minetest.get_item_group(nn, "rail") ~= 0
+function is_rail(node)
+    if node == nil then
+        return false
+    end
+    local nn = node.name
+    return minetest.get_item_group(nn, "rail") ~= 0
 end
 
 --set the minecart's direction
@@ -364,7 +367,7 @@ function add_spawn_item(minecart)
             if not pointed_thing.type == "node" then
                 return
             end
-            if is_rail(pointed_thing.under) then
+            if is_rail(minetest.get_node(pointed_thing.under)) then
                 minetest.env:add_entity(pointed_thing.under, "railtest:" .. minecart.item_name .. "_entity")
                 if not minetest.setting_getbool("creative_mode") then
                     itemstack:take_item()

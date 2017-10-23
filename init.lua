@@ -39,7 +39,7 @@ minetest.register_craftitem("railtest:steam_train", {
         if not pointed_thing.type == "node" then
             return
         end
-        if cart_func:is_rail(pointed_thing.under) then
+        if is_rail(minetest.get_node(pointed_thing.under)) then
             minetest.env:add_entity(pointed_thing.under, "railtest:steam_train_entity")
             if not minetest.setting_getbool("creative_mode") then
                 itemstack:take_item()
